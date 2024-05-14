@@ -1,33 +1,33 @@
-package gamelogic
+package game
 
 import (
 	"sync"
 )
 
 type GameState struct {
+	mu     *sync.RWMutex
 	Player Player
 	Paused bool
-	mu     *sync.RWMutex
 }
 
 func NewGameState(username string) *GameState {
 	return &GameState{
 		Player: Player{
 			Username: username,
-			Units:    map[int]Unit{},
+			Units:    make(map[int]Unit),
 		},
 		Paused: false,
 		mu:     &sync.RWMutex{},
 	}
 }
 
-func (gs *GameState) resumeGame() {
+func (gs *GameState) resume() {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 	gs.Paused = false
 }
 
-func (gs *GameState) pauseGame() {
+func (gs *GameState) pause() {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 	gs.Paused = true
@@ -39,20 +39,20 @@ func (gs *GameState) isPaused() bool {
 	return gs.Paused
 }
 
+func (gs *GameState) removeUnitsInLocation(l Location) {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+	for k, v := range gs.Player.Units {
+		if v.Location == l {
+			delete(gs.Player.Units, k)
+		}
+	}
+}
+
 func (gs *GameState) addUnit(u Unit) {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 	gs.Player.Units[u.ID] = u
-}
-
-func (gs *GameState) removeUnitsInLocation(loc Location) {
-	gs.mu.Lock()
-	defer gs.mu.Unlock()
-	for k, v := range gs.Player.Units {
-		if v.Location == loc {
-			delete(gs.Player.Units, k)
-		}
-	}
 }
 
 func (gs *GameState) UpdateUnit(u Unit) {
@@ -65,14 +65,14 @@ func (gs *GameState) GetUsername() string {
 	return gs.Player.Username
 }
 
-func (gs *GameState) getUnitsSnap() []Unit {
+func (gs *GameState) getUnitsSnapshot() []Unit {
 	gs.mu.RLock()
 	defer gs.mu.RUnlock()
-	Units := []Unit{}
+	units := []Unit{}
 	for _, v := range gs.Player.Units {
-		Units = append(Units, v)
+		units = append(units, v)
 	}
-	return Units
+	return units
 }
 
 func (gs *GameState) GetUnit(id int) (Unit, bool) {
@@ -82,15 +82,15 @@ func (gs *GameState) GetUnit(id int) (Unit, bool) {
 	return u, ok
 }
 
-func (gs *GameState) GetPlayerSnap() Player {
+func (gs *GameState) GetPlayerSnapshot() Player {
 	gs.mu.RLock()
 	defer gs.mu.RUnlock()
-	Units := map[int]Unit{}
+	units := map[int]Unit{}
 	for k, v := range gs.Player.Units {
-		Units[k] = v
+		units[k] = v
 	}
 	return Player{
 		Username: gs.Player.Username,
-		Units:    Units,
+		Units:    units,
 	}
 }

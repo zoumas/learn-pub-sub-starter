@@ -1,4 +1,4 @@
-package gamelogic
+package game
 
 import (
 	"fmt"
@@ -9,15 +9,17 @@ import (
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 )
 
-const logsFile = "game.log"
-
-const writeToDiskSleep = 1 * time.Second
+const (
+	logFilename      = "game.log"
+	writeToDiskSleep = time.Second
+)
 
 func WriteLog(gamelog routing.GameLog) error {
 	log.Printf("received game log...")
+	// Question: why sleep?
 	time.Sleep(writeToDiskSleep)
 
-	f, err := os.OpenFile(logsFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(logFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("could not open logs file: %v", err)
 	}
@@ -28,5 +30,6 @@ func WriteLog(gamelog routing.GameLog) error {
 	if err != nil {
 		return fmt.Errorf("could not write to logs file: %v", err)
 	}
+
 	return nil
 }

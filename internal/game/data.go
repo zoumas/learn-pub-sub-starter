@@ -1,36 +1,41 @@
-package gamelogic
-
-type Player struct {
-	Username string
-	Units    map[int]Unit
-}
-
-type UnitRank string
+package game
 
 const (
 	RankInfantry  = "infantry"
 	RankCavalry   = "cavalry"
 	RankArtillery = "artillery"
+
+	powerArtillery = 10
+	powerCavalry   = 5
+	powerInfantry  = 1
+)
+
+type Player struct {
+	Units    map[int]Unit
+	Username string
+}
+
+type (
+	UnitRank string
+	Location string
 )
 
 type Unit struct {
-	ID       int
 	Rank     UnitRank
 	Location Location
+	ID       int
 }
 
 type ArmyMove struct {
 	Player     Player
-	Units      []Unit
 	ToLocation Location
+	Units      []Unit
 }
 
 type RecognitionOfWar struct {
 	Attacker Player
 	Defender Player
 }
-
-type Location string
 
 func getAllRanks() map[UnitRank]struct{} {
 	return map[UnitRank]struct{}{

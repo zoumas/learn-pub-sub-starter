@@ -1,4 +1,4 @@
-package gamelogic
+package game
 
 import (
 	"errors"
@@ -16,7 +16,7 @@ const (
 
 func (gs *GameState) HandleMove(move ArmyMove) MoveOutcome {
 	defer fmt.Println("------------------------")
-	player := gs.GetPlayerSnap()
+	player := gs.GetPlayerSnapshot()
 
 	fmt.Println()
 	fmt.Println("==== Move Detected ====")
@@ -34,6 +34,7 @@ func (gs *GameState) HandleMove(move ArmyMove) MoveOutcome {
 		fmt.Printf("You have units in %s! You are at war with %s!\n", overlappingLocation, move.Player.Username)
 		return MoveOutcomeMakeWar
 	}
+
 	fmt.Printf("You are safe from %s's units.\n", move.Player.Username)
 	return MoveOutComeSafe
 }
@@ -50,17 +51,18 @@ func getOverlappingLocation(p1 Player, p2 Player) Location {
 }
 
 func (gs *GameState) CommandMove(words []string) (ArmyMove, error) {
-	if gs.isPaused() {
+	switch {
+	case gs.isPaused():
 		return ArmyMove{}, errors.New("the game is paused, you can not move units")
-	}
-	if len(words) < 3 {
+	case len(words) < 3:
 		return ArmyMove{}, errors.New("usage: move <location> <unitID> <unitID> <unitID> etc")
 	}
+
 	newLocation := Location(words[1])
-	locations := getAllLocations()
-	if _, ok := locations[newLocation]; !ok {
+	if !validLocation(newLocation) {
 		return ArmyMove{}, fmt.Errorf("error: %s is not a valid location", newLocation)
 	}
+
 	unitIDs := []int{}
 	for _, word := range words[2:] {
 		id := word
@@ -82,9 +84,10 @@ func (gs *GameState) CommandMove(words []string) (ArmyMove, error) {
 
 	mv := ArmyMove{
 		ToLocation: newLocation,
-		Units:      gs.getUnitsSnap(),
-		Player:     gs.GetPlayerSnap(),
+		Units:      gs.getUnitsSnapshot(),
+		Player:     gs.GetPlayerSnapshot(),
 	}
 	fmt.Printf("Moved %v units to %s\n", len(mv.Units), mv.ToLocation)
+
 	return mv, nil
 }
