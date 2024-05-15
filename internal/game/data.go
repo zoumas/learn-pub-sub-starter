@@ -2,12 +2,13 @@ package game
 
 const (
 	RankInfantry  = "infantry"
-	RankCavalry   = "cavalry"
-	RankArtillery = "artillery"
+	powerInfantry = 1
 
+	RankCavalry  = "cavalry"
+	powerCavalry = 5
+
+	RankArtillery  = "artillery"
 	powerArtillery = 10
-	powerCavalry   = 5
-	powerInfantry  = 1
 )
 
 type Player struct {
