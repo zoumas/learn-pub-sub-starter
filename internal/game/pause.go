@@ -1,4 +1,4 @@
-package gamelogic
+package game
 
 import (
 	"fmt"
@@ -11,9 +11,9 @@ func (gs *GameState) HandlePause(ps routing.PlayingState) {
 	fmt.Println()
 	if ps.IsPaused {
 		fmt.Println("==== Pause Detected ====")
-		gs.pauseGame()
+		gs.pause()
 	} else {
 		fmt.Println("==== Resume Detected ====")
-		gs.resumeGame()
+		gs.resume()
 	}
 }
